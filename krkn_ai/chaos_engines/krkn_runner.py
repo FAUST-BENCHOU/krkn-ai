@@ -110,43 +110,59 @@ class KrknRunner:
         # calculate fitness scores
         fitness_result: FitnessResult = FitnessResult()
 
-        # If user provided fitness_function.query, then we use the default function to calculate
-        if self.config.fitness_function.query is not None:
-            fitness_value = self.calculate_fitness_value(
-                start=start_time,
-                end=end_time,
-                query=self.config.fitness_function.query,
-                fitness_type=self.config.fitness_function.type
-            )
-            fitness_result.fitness_score = fitness_value
-        elif len(self.config.fitness_function.items) > 0:
-            fitness_result = self.calculate_fitness_score_for_items(
-                start=start_time,
-                end=end_time
-            )
-
         health_check_results = health_check_watcher.get_results()
 
-        # Include krkn hub run failure info to the fitness score
-        if self.config.fitness_function.include_krkn_failure:
-            # Status code 2 means that SLOs not met per Krkn test
-            if returncode == 2:
-                fitness_result.krkn_failure_score = KRKN_HUB_FAILURE_SCORE
+        # Check if krkn scenario failed due to misconfiguration (non-zero and not status code 2)
+        # Status code 2 means that SLOs not met per Krkn test (valid failure)
+        # Other non-zero status codes indicate misconfiguration errors
+        if returncode != 0 and returncode != 2:
+            # Misconfiguration failure - skip fitness calculation and set failure marker
+            logger.warning(
+                "Krkn scenario failed with return code %d (misconfiguration). "
+                "Skipping fitness calculation to avoid data pollution.",
+                returncode
+            )
+            if self.config.fitness_function.include_krkn_failure:
+                fitness_result.krkn_failure_score = -1.0
+            fitness_result.fitness_score = -1.0
+            logger.info("Fitness score set to -1 due to misconfiguration failure")
+        else:
+            # Normal execution path - calculate fitness scores
+            # If user provided fitness_function.query, then we use the default function to calculate
+            if self.config.fitness_function.query is not None:
+                fitness_value = self.calculate_fitness_value(
+                    start=start_time,
+                    end=end_time,
+                    query=self.config.fitness_function.query,
+                    fitness_type=self.config.fitness_function.type
+                )
+                fitness_result.fitness_score = fitness_value
+            elif len(self.config.fitness_function.items) > 0:
+                fitness_result = self.calculate_fitness_score_for_items(
+                    start=start_time,
+                    end=end_time
+                )
 
-        # Include health check failure and response time to the fitness score
-        if self.config.fitness_function.include_health_check_failure:
-            fitness_result.health_check_failure_score = health_check_watcher.summarize_success_rate(health_check_results)
-        if self.config.fitness_function.include_health_check_response_time:
-            fitness_result.health_check_response_time_score = health_check_watcher.summarize_response_time(health_check_results)
+            # Include krkn hub run failure info to the fitness score
+            if self.config.fitness_function.include_krkn_failure:
+                # Status code 2 means that SLOs not met per Krkn test
+                if returncode == 2:
+                    fitness_result.krkn_failure_score = KRKN_HUB_FAILURE_SCORE
 
-        # Calculate overall fitness score
-        fitness_result.fitness_score = sum([
-            fitness_result.fitness_score,
-            fitness_result.krkn_failure_score,
-            fitness_result.health_check_failure_score,
-            fitness_result.health_check_response_time_score
-        ])
-        logger.info("Fitness score: %s", fitness_result.fitness_score)
+            # Include health check failure and response time to the fitness score
+            if self.config.fitness_function.include_health_check_failure:
+                fitness_result.health_check_failure_score = health_check_watcher.summarize_success_rate(health_check_results)
+            if self.config.fitness_function.include_health_check_response_time:
+                fitness_result.health_check_response_time_score = health_check_watcher.summarize_response_time(health_check_results)
+
+            # Calculate overall fitness score
+            fitness_result.fitness_score = sum([
+                fitness_result.fitness_score,
+                fitness_result.krkn_failure_score,
+                fitness_result.health_check_failure_score,
+                fitness_result.health_check_response_time_score
+            ])
+            logger.info("Fitness score: %s", fitness_result.fitness_score)
 
         return CommandRunResult(
             generation_id=generation_id,
