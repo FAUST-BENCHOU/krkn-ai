@@ -313,9 +313,6 @@ class SynFloodPacketSizeParameter(BaseParameter):
     krknctl_name: str = "packet-size"
     value: int = 120
 
-    def mutate(self):
-        self.value = rng.randint(64, 1500)
-
 class SynFloodWindowSizeParameter(BaseParameter):
     krknhub_name: str = "WINDOW_SIZE"
     krknctl_name: str = "window-size"
