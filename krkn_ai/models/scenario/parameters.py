@@ -312,7 +312,7 @@ class IOBlockSizeParameter(BaseParameter):
     '''
     Size of each write in bytes. Size can be from 1 byte to 4 Megabytes (allowed suffix are b,k,m)
     '''
-    krknhub_name: str = "OO_BLOCK_SIZE"
+    krknhub_name: str = "IO_BLOCK_SIZE"
     krknctl_name: str = "oo-block-size"
     value: str = "1m"
 
