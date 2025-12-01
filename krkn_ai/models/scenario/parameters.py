@@ -307,3 +307,13 @@ class EgressParameter(BaseParameter):
     krknctl_name: str = "egress"
     value: str = "true"
 
+class DeleteCountParameter(BaseParameter):
+    krknhub_name: str = "DELETE_COUNT"
+    krknctl_name: str = "delete-count"
+    value: int = 1
+
+class RunsParameter(BaseParameter):
+    krknhub_name: str = "RUNS"
+    krknctl_name: str = "runs"
+    value: int = 1
+

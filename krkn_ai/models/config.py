@@ -31,6 +31,9 @@ class NetworkScenarioConfig(BaseModel):
 class DnsOutageScenarioConfig(BaseModel):
     enable: bool = False
 
+class ServiceDisruptionScenarioConfig(BaseModel):
+    enable: bool = False
+
 class ScenarioConfig(BaseModel):
     application_outages: Optional[AppOutageScenarioConfig] = Field(
         alias="application-outages", default=None
@@ -55,6 +58,9 @@ class ScenarioConfig(BaseModel):
     )
     dns_outage: Optional[DnsOutageScenarioConfig] = Field(
         alias="dns-outage", default=None
+    )
+    service_disruption: Optional[ServiceDisruptionScenarioConfig] = Field(
+        alias="service-disruption", default=None
     )
 
 
