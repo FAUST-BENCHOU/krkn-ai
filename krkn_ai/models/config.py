@@ -16,7 +16,7 @@ class AppOutageScenarioConfig(BaseModel):
 
 
 class ContainerScenarioConfig(BaseModel):
-    enable: bool = False
+    enable: bool = False  
 
 
 class NodeHogScenarioConfig(BaseModel):
@@ -32,6 +32,7 @@ class DnsOutageScenarioConfig(BaseModel):
     enable: bool = False
 
 class ServiceDisruptionScenarioConfig(BaseModel):
+class SynFloodScenarioConfig(BaseModel):
     enable: bool = False
 
 class ScenarioConfig(BaseModel):
@@ -50,6 +51,9 @@ class ScenarioConfig(BaseModel):
     node_memory_hog: Optional[NodeHogScenarioConfig] = Field(
         alias="node-memory-hog", default=None
     )
+    node_io_hog: Optional[NodeHogScenarioConfig] = Field(
+        alias="node-io-hog", default=None
+    )
     time_scenarios: Optional[TimeScenarioConfig] = Field(
         alias="time-scenarios", default=None
     )
@@ -61,6 +65,8 @@ class ScenarioConfig(BaseModel):
     )
     service_disruption: Optional[ServiceDisruptionScenarioConfig] = Field(
         alias="service-disruption", default=None
+    syn_flood: Optional[SynFloodScenarioConfig] = Field(
+        alias="syn-flood", default=None
     )
 
 
