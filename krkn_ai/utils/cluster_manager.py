@@ -14,6 +14,7 @@ from krkn_ai.models.cluster_components import (
     Pod,
     Service,
     ServicePort,
+    VM,
 )
 
 logger = get_logger(__name__)
@@ -42,6 +43,7 @@ class ClusterManager:
             pods = self.list_pods(namespace, pod_label_pattern, skip_pod_name_patterns)
             namespaces[i].pods = pods
             namespaces[i].services = self.list_services(namespace)
+            namespaces[i].vms = self.list_vms(namespace)
 
         return ClusterComponents(
             namespaces=namespaces,
@@ -128,6 +130,32 @@ class ClusterManager:
 
         logger.debug("Discovered %d services in namespace %s", len(service_list), namespace.name)
         return service_list
+
+    def list_vms(self, namespace: Namespace) -> List[VM]:
+        try:
+            vms_response = self.custom_obj_api.list_namespaced_custom_object(
+                "kubevirt.io", "v1", namespace.name, "virtualmachines"
+            )
+            vms = vms_response.get("items", [])
+            vm_list = []
+
+            if vms:
+                logger.debug("Found %d vms in namespace %s", len(vms), namespace.name)
+            else:
+                logger.debug("No VMs found in namespace %s", namespace.name)
+
+            for vm in vms:
+                vm_component = VM(
+                    name=vm["metadata"]["name"]
+                )
+                vm_list.append(vm_component)
+
+            logger.debug("Filtered %d vms in namespace %s", len(vm_list), namespace.name)
+            return vm_list
+        except Exception as e:
+            # KubeVirt might not be installed, or API might not be available
+            logger.debug("Failed to list VMs in namespace %s: %s", namespace.name, str(e))
+            return []
 
     def list_containers(self, pod_spec: V1PodSpec) -> List[Container]:
         containers = []

@@ -17,6 +17,7 @@ from krkn_ai.models.scenario.scenario_time import TimeScenario
 from krkn_ai.models.scenario.scenario_dns_outage import DnsOutageScenario
 from krkn_ai.models.scenario.scenario_syn_flood import SynFloodScenario
 from krkn_ai.models.scenario.scenario_io_hog import NodeIOHogScenario
+from krkn_ai.models.scenario.scenario_kubevirt_outage import KubeVirtOutageScenario
 
 
 logger = get_logger(__name__)
@@ -32,6 +33,7 @@ scenario_specs = [
     ("network_scenarios", NetworkScenario),
     ("dns_outage", DnsOutageScenario),
     ("syn_flood", SynFloodScenario),
+    ("kubevirt_outage", KubeVirtOutageScenario),
 ]
 
 class ScenarioFactory:

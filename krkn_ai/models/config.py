@@ -34,6 +34,9 @@ class DnsOutageScenarioConfig(BaseModel):
 class SynFloodScenarioConfig(BaseModel):
     enable: bool = False
 
+class KubeVirtOutageScenarioConfig(BaseModel):
+    enable: bool = False
+
 class ScenarioConfig(BaseModel):
     application_outages: Optional[AppOutageScenarioConfig] = Field(
         alias="application-outages", default=None
@@ -64,6 +67,9 @@ class ScenarioConfig(BaseModel):
     )
     syn_flood: Optional[SynFloodScenarioConfig] = Field(
         alias="syn-flood", default=None
+    )
+    kubevirt_outage: Optional[KubeVirtOutageScenarioConfig] = Field(
+        alias="kubevirt-outage", default=None
     )
 
 

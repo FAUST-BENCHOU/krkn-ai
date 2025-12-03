@@ -423,3 +423,18 @@ class NodeMountPathParameter(BaseParameter):
     krknctl_name: str = "node-mount-path"
     value: str = "/root"
 
+class VMNameParameter(BaseParameter):
+    krknhub_name: str = "VM_NAME"
+    krknctl_name: str = "vm-name"
+    value: str = "" 
+
+class KubeVirtTimeoutParameter(BaseParameter):
+    krknhub_name: str = "TIMEOUT"
+    krknctl_name: str = "timeout"
+    value: int = 180
+
+class KillCountParameter(BaseParameter):
+    krknhub_name: str = "KILL_COUNT"
+    krknctl_name: str = "kill-count"
+    value: int = 1 
+
