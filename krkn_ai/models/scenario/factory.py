@@ -6,6 +6,7 @@ from krkn_ai.models.scenario.base import Scenario
 from krkn_ai.models.scenario.scenario_network import NetworkScenario
 from krkn_ai.utils.logger import get_logger
 from krkn_ai.utils.rng import rng
+from krkn_ai.utils.pvc_utils import initialize_kubeconfig
 
 from krkn_ai.models.scenario.scenario_dummy import DummyScenario
 from krkn_ai.models.scenario.scenario_pod import PodScenario
@@ -18,6 +19,7 @@ from krkn_ai.models.scenario.scenario_dns_outage import DnsOutageScenario
 from krkn_ai.models.scenario.scenario_syn_flood import SynFloodScenario
 from krkn_ai.models.scenario.scenario_io_hog import NodeIOHogScenario
 from krkn_ai.models.scenario.scenario_kubevirt_outage import KubeVirtOutageScenario
+from krkn_ai.models.scenario.scenario_pvc import PVCScenario
 
 
 logger = get_logger(__name__)
@@ -34,6 +36,7 @@ scenario_specs = [
     ("dns_outage", DnsOutageScenario),
     ("syn_flood", SynFloodScenario),
     ("kubevirt_outage", KubeVirtOutageScenario),
+    ("pvc_scenarios", PVCScenario),
 ]
 
 class ScenarioFactory:
@@ -60,6 +63,9 @@ class ScenarioFactory:
         if len(candidates) == 0:
             raise MissingScenarioError("No scenarios found. Please provide atleast 1 scenario.")
 
+        # Initialize kubeconfig for PVC utilities
+        initialize_kubeconfig(config.kubeconfig_file_path)
+        
         # Validate scenarios and find valid scenarios
         valid_scenarios = []
         for name, cls in candidates:

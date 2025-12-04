@@ -12,6 +12,7 @@ from krkn_ai.models.cluster_components import (
     Namespace,
     Node,
     Pod,
+    PVC,
     Service,
     ServicePort,
     VM,
@@ -44,6 +45,7 @@ class ClusterManager:
             namespaces[i].pods = pods
             namespaces[i].services = self.list_services(namespace)
             namespaces[i].vms = self.list_vms(namespace)
+            namespaces[i].pvcs = self.list_pvcs(namespace)
 
         return ClusterComponents(
             namespaces=namespaces,
@@ -155,6 +157,26 @@ class ClusterManager:
         except Exception as e:
             # KubeVirt might not be installed, or API might not be available
             logger.debug("Failed to list VMs in namespace %s: %s", namespace.name, str(e))
+            return []
+
+    def list_pvcs(self, namespace: Namespace) -> List[PVC]:
+        """List all PVCs in the namespace"""
+        try:
+            pvcs = self.core_api.list_namespaced_persistent_volume_claim(namespace=namespace.name).items
+            pvc_list = []
+            
+            for pvc in pvcs:
+                pvc_list.append(
+                    PVC(
+                        name=pvc.metadata.name,
+                        labels=pvc.metadata.labels or {},
+                    )
+                )
+            
+            logger.info("Discovered %d PVCs in namespace %s", len(pvc_list), namespace.name)
+            return pvc_list
+        except Exception as e:
+            logger.warning("Failed to list PVCs in namespace %s: %s", namespace.name, str(e))
             return []
 
     def list_containers(self, pod_spec: V1PodSpec) -> List[Container]:
