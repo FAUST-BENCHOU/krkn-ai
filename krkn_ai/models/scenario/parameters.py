@@ -44,9 +44,6 @@ class KillTimeoutParameter(BaseParameter):
     krknctl_name: str = "kill-timeout"
     value: int = 60
 
-class TimeoutParameter(BaseParameter):
-    name: str = "TIMEOUT"
-    value: int = 60
 
 class ExpRecoveryTimeParameter(BaseParameter):
     krknhub_name: str = "EXPECTED_RECOVERY_TIME"
@@ -445,10 +442,17 @@ class NodeMountPathParameter(BaseParameter):
     krknctl_name: str = "node-mount-path"
     value: str = "/root"
 
+class VMTimeoutParameter(BaseParameter):
+    krknhub_name: str = "TIMEOUT"
+    krknctl_name: str = "timeout"
+    value: int = 60
+
 class VMNameParameter(BaseParameter):
-    name: str = "VM_NAME"
+    krknhub_name: str = "VM_NAME"
+    krknctl_name: str = "vm-name"
     value: str = ""
 
 class KillCountParameter(BaseParameter):
-    name: str = "KILL_COUNT"
+    krknhub_name: str = "KILL_COUNT"
+    krknctl_name: str = "kill-count"
     value: int = 1

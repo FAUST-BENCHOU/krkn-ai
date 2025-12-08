@@ -12,11 +12,11 @@ class KubevirtDisruptionScenario(Scenario):
     krknctl_name: str = "kubevirt-outage"
     krknhub_image: str = "containers.krkn-chaos.dev/krkn-chaos/krkn-hub:kubevirt-outage"
 
-    timeout: TimeoutParameter = TimeoutParameter()
+    timeout: VMTimeoutParameter = VMTimeoutParameter()
     vm_name: VMNameParameter = VMNameParameter()
     namespace: NamespaceParameter = NamespaceParameter()
     kill_count: KillCountParameter = KillCountParameter()
-    
+
     def __init__(self, **data):
         super().__init__(**data)
         self.mutate()
@@ -35,18 +35,18 @@ class KubevirtDisruptionScenario(Scenario):
         if len(self._cluster_components.namespaces) == 0:
             raise ScenarioParameterInitError("No namespaces found in cluster components")
         
-        namespaces = List[Tuple[Namespace, VMI]] = []  # (namespace, vm)
+        namespaces: List[Tuple[Namespace, VMI]] = []  # (namespace, vm)
         
         for ns in self._cluster_components.namespaces:
-            if len(ns.vms) > 0:
-                namespaces.extend((ns, vmi) for vmi in namespace.vmis)
+            if len(ns.vmis) > 0:
+                namespaces.extend((ns, vmi) for vmi in ns.vmis)
 
         # Check availability before mutation - skip test if no vms found
         if not namespaces:
             raise ScenarioParameterInitError("No VMS found in cluster components for KubeVirt scenario")
         
-        namespace, vmis = rng.choice(namespaces)
-        self.vm_name.value = vmis.name
+        namespace, vmi = rng.choice(namespaces)
+        self.vm_name.value = vmi.name
         self.namespace.value = namespace.name
-        self.kill_count =  rng.randint(1, len(namespace.vmis))
+        self.kill_count.value =  1  # Set to 1 as we select only one VM by name
 

@@ -16,7 +16,7 @@ from krkn_ai.models.cluster_components import (
     Service,
     ServicePort,
 )
-from krkn_ai.utils.logger import get_module_logger
+from krkn_ai.utils.logger import get_logger
 from krkn_ai.models.cluster_components import ClusterComponents, Container, Namespace, Node, Pod, VMI
 
 logger = get_logger(__name__)
@@ -47,8 +47,8 @@ class ClusterManager:
             namespaces[i].services = self.list_services(namespace)
             namespaces[i].pvcs = self.list_pvcs(namespace)
 
-            vms = self.list_vms(namespace)
-            namespaces[i].vms = vms
+            vmis = self.list_vmis(namespace)
+            namespaces[i].vmis = vmis
 
         return ClusterComponents(
             namespaces=namespaces,
