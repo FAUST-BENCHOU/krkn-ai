@@ -1,6 +1,13 @@
 set -e
 
-export NGINX_ROUTE="http://$(kubectl get service rs -o json | jq -r '.status.loadBalancer.ingress[0].hostname')"
+export HOST=${HOST:-}
+
+# If HOST is not set, use the hostname of the service rs (nginx-proxy)
+if [ -z "$HOST" ]; then
+    export NGINX_ROUTE="http://$(kubectl get service rs -o json | jq -r '.status.loadBalancer.ingress[0].hostname')"
+else
+    export NGINX_ROUTE="$HOST"
+fi
 
 echo "NGINX_ROUTE: $NGINX_ROUTE"
 

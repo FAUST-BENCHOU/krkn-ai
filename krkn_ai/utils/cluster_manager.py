@@ -167,22 +167,25 @@ class ClusterManager:
         return containers
 
     def list_vmis(self, namespace: Namespace) -> List[VMI]:
+        try:
+            vmis_response = self.custom_obj_api.list_namespaced_custom_object("kubevirt.io","v1",namespace.name,"virtualmachineinstances")
+            vmis = vmis_response.get("items", [])
+            vmi_list = []
+            if vmis:
+                logger.debug("Found %d vmis in namespace %s", len(vmis), vmis[0]["metadata"]["name"])
+            else:
+                logger.debug("No VMIs found in namespace %s", namespace.name)
+            for vmi in vmis:
+                vmi_component = VMI(
+                    name=vmi["metadata"]["name"]
+                )
+                vmi_list.append(vmi_component)
 
-        vmis_response = self.custom_obj_api.list_namespaced_custom_object("kubevirt.io","v1",namespace.name,"virtualmachineinstances")
-        vmis = vmis_response.get("items", [])
-        vmi_list = []
-        if vmis:
-            logger.debug("Found %d vmis in namespace %s", len(vmis), vmis[0]["metadata"]["name"])
-        else:
-            logger.debug("No VMIs found in namespace %s", namespace.name)
-        for vmi in vmis:
-            vmi_component = VMI(
-                name=vmi["metadata"]["name"]
-            )
-            vmi_list.append(vmi_component)
-
-        logger.debug("Filtered %d vmis in namespace %s", len(vmi_list), namespace.name)
-        return vmi_list
+            logger.debug("Filtered %d vmis in namespace %s", len(vmi_list), namespace.name)
+            return vmi_list
+        except Exception as e:
+            logger.warning("Unable to find VMIs in namespace %s", namespace.name)
+            return []
 
     def list_nodes(self, node_label_pattern: str = None) -> List[Node]:
         node_label_pattern = list(set(self.__process_pattern(node_label_pattern) + ["kubernetes.io/hostname"]))
@@ -239,7 +242,7 @@ class ClusterManager:
         logger.debug("Listing node interfaces for node %s", node)
         log, code = run_shell(f"oc debug -q node/{node} -- chroot /host ls /sys/class/net", do_not_log=True)
         if code != 0:
-            logger.error("Failed to list node interfaces for node %s", node)
+            logger.warning("Unable to find interfaces for node %s", node)
             return []
         
         interfaces = []
